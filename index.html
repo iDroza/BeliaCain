@@ -308,7 +308,7 @@
       <span class="word" style="--d:0s">I</span>&nbsp;<span class="word" style="--d:.12s">love</span>&nbsp;<span class="word" style="--d:.24s">you,</span>&nbsp;<span class="word name lit" style="--d:.4s">Belia</span><span class="word" style="--d:.56s">.</span>
     </h1>
 
-    <p class="note"><span class="rot" id="rot">The <span class="accent">world</span> is yours.</span></p>
+    <p class="note"><span class="rot" id="rot">I write this for <span class="accent">you</span>.</span></p>
   </main>
 
   <div class="hint" id="hint">tap anywhere ♡</div>
@@ -322,7 +322,6 @@
 
     /* ---------- Rotating quotes ---------- */
     var quotes = [
-      {text:`The world is yours.`,accent:`world`},
       {text:`ya no llores, ya no temas.`,accent:`.`},
       {text:`I write this for you.`,accent:`you`},
       {text:`I can't hold enough of you in my hands.`,accent:`hands`},
@@ -337,7 +336,10 @@
       {text:`Winter took more than the flowers.`,accent:`.`},
       {text:`The february hills are green.`,accent:`green`},
       {text:`The december hills are green.`,accent:`green`},
-      {text:`I touched the sun with borrowed hands.`,accent:`hands`}
+      {text:`I touched the sun with borrowed hands.`,accent:`hands`},
+      {text:`I feel saturated by it.`,accent:`saturated`},
+      {text:`Retain the dreams you believe are worth suffering for.`,accent:`suffering`},
+      {text:`My flesh decays with each passing second.`,accent:`second`}
     ];
     // Fisher-Yates shuffle so each visit differs
     for (var sx = quotes.length - 1; sx > 0; sx--) {
@@ -358,6 +360,9 @@
     var rot = document.getElementById("rot");
     if (rot && !reduce) {
       var qi = 0;
+      // open on a random (shuffled) line so every visit starts differently
+      rot.innerHTML = renderQuote(quotes[qi]);
+      qi = (qi + 1) % quotes.length;
       setInterval(function () {
         rot.classList.add("out");
         setTimeout(function () {
