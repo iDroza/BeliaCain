@@ -158,11 +158,6 @@
       opacity: 0;
       animation: fadeUp 1s ease-out 0.1s forwards;
     }
-    .eyebrow .spark {
-      display: inline-block;
-      animation: beat 1.8s ease-in-out infinite;
-    }
-
     .headline {
       font-weight: 800;
       font-size: clamp(40px, 9.2vw, 116px);
@@ -213,9 +208,9 @@
     }
 
     .note {
-      margin: 34px auto 0;
-      min-height: 1.6em;
-      max-width: 38ch;
+      margin: 30px auto 0;
+      min-height: 3em;
+      max-width: 44ch;
       font-size: clamp(15px, 2.4vw, 21px);
       font-weight: 400;
       line-height: 1.55;
@@ -225,9 +220,18 @@
     }
     .note .rot {
       display: inline-block;
-      transition: opacity 0.6s ease, transform 0.6s ease;
+      transition: opacity 0.55s ease, transform 0.55s ease;
     }
     .note .rot.out { opacity: 0; transform: translateY(8px); }
+    .note .accent {
+      background: linear-gradient(100deg, #ff8ad8, #b14bff 45%, #ff5db1 78%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      color: transparent;
+      font-weight: 600;
+      filter: drop-shadow(0 2px 14px rgba(177, 75, 255, 0.35));
+    }
 
     /* tap hint */
     .hint {
@@ -267,12 +271,6 @@
       from { opacity: 0; transform: translateY(16px); }
       to   { opacity: 1; transform: translateY(0); }
     }
-    @keyframes beat {
-      0%,100% { transform: scale(1); }
-      14%     { transform: scale(1.32); }
-      28%     { transform: scale(1.05); }
-      42%     { transform: scale(1.22); }
-    }
     @keyframes floaty {
       0%,100% { transform: translateX(-50%) translateY(0); }
       50%     { transform: translateX(-50%) translateY(-6px); }
@@ -290,7 +288,6 @@
       .eyebrow, .note, .hint, .footer-link { animation: none !important; opacity: 1 !important; transform: translateX(-50%); }
       .eyebrow, .note { transform: none; opacity: 1 !important; }
       .footer-link, .hint { transform: translateX(-50%); }
-      .eyebrow .spark { animation: none !important; }
     }
   </style>
 </head>
@@ -305,13 +302,13 @@
   <div class="vignette" aria-hidden="true"></div>
 
   <main>
-    <p class="eyebrow"><span class="spark">♡</span>&nbsp; Forever &amp; Always &nbsp;<span class="spark">♡</span></p>
+    <p class="eyebrow">The World Is Yours</p>
 
     <h1 class="headline">
       <span class="word" style="--d:0s">I</span>&nbsp;<span class="word" style="--d:.12s">love</span>&nbsp;<span class="word" style="--d:.24s">you,</span>&nbsp;<span class="word name lit" style="--d:.4s">Belia</span><span class="word" style="--d:.56s">.</span>
     </h1>
 
-    <p class="note"><span class="rot" id="rot">You are my favorite thought, every single day.</span></p>
+    <p class="note"><span class="rot" id="rot">The <span class="accent">world</span> is yours.</span></p>
   </main>
 
   <div class="hint" id="hint">tap anywhere ♡</div>
@@ -323,26 +320,52 @@
     "use strict";
     var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-    /* ---------- Rotating love notes ---------- */
-    var notes = [
-      "You are my favorite thought, every single day.",
-      "In every lifetime, I would still choose you.",
-      "My favorite place in the world is right next to you.",
-      "You make the ordinary feel like magic.",
-      "Forever still feels too short with you.",
-      "Of all my hellos, you're the one I never want to end."
+    /* ---------- Rotating quotes ---------- */
+    var quotes = [
+      {text:`The world is yours.`,accent:`world`},
+      {text:`ya no llores, ya no temas.`,accent:`.`},
+      {text:`I write this for you.`,accent:`you`},
+      {text:`I can't hold enough of you in my hands.`,accent:`hands`},
+      {text:`I hope I am more than a person to you, but a concept.`,accent:`concept`},
+      {text:`I'll find you in these waters.`,accent:`waters`},
+      {text:`Once then we'll be free.`,accent:`free`},
+      {text:`May your desire be greater than your obstacles.`,accent:`greater than`},
+      {text:`Something to hold when there is nothing to say.`,accent:`nothing`},
+      {text:`I mourn your absence.`,accent:`absence`},
+      {text:`I wish I was kinder to you.`,accent:`.`},
+      {text:`I steal a few breaths from the world for a minute.`,accent:`for a minute`},
+      {text:`Winter took more than the flowers.`,accent:`.`},
+      {text:`The february hills are green.`,accent:`green`},
+      {text:`The december hills are green.`,accent:`green`},
+      {text:`I touched the sun with borrowed hands.`,accent:`hands`}
     ];
+    // Fisher-Yates shuffle so each visit differs
+    for (var sx = quotes.length - 1; sx > 0; sx--) {
+      var sk = Math.floor(Math.random() * (sx + 1));
+      var stmp = quotes[sx]; quotes[sx] = quotes[sk]; quotes[sk] = stmp;
+    }
+    function escapeHtml(s) {
+      return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    }
+    function renderQuote(q) {
+      var t = q.text, a = q.accent || "";
+      var idx = a ? t.indexOf(a) : -1;
+      if (idx === -1) return escapeHtml(t);
+      return escapeHtml(t.slice(0, idx)) +
+        '<span class="accent">' + escapeHtml(t.slice(idx, idx + a.length)) + "</span>" +
+        escapeHtml(t.slice(idx + a.length));
+    }
     var rot = document.getElementById("rot");
     if (rot && !reduce) {
-      var i = 0;
+      var qi = 0;
       setInterval(function () {
         rot.classList.add("out");
         setTimeout(function () {
-          i = (i + 1) % notes.length;
-          rot.textContent = notes[i];
+          rot.innerHTML = renderQuote(quotes[qi]);
           rot.classList.remove("out");
+          qi = (qi + 1) % quotes.length;
         }, 600);
-      }, 4200);
+      }, 4600);
     }
 
     /* ---------- Floating hearts on canvas ---------- */
